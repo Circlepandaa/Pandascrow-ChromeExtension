@@ -98,8 +98,10 @@ async function send(env: Env, method: string, path: string, opts: { query?: Quer
   let res: Response;
   try {
     res = await fetch(url.toString(), { method, headers, body: opts.body === undefined ? undefined : JSON.stringify(opts.body) });
-  } catch {
-    throw new ApiError("Couldn't reach Pandascrow. Check your internet connection.");
+  } catch (err) {
+    // Say which server failed, so a wrong or unreachable API host is easy to spot
+    console.error('[Pandascrow] request failed', method, url.toString(), err);
+    throw new ApiError(`Couldn't reach ${url.host}. Check your internet connection, or whether this server is up.`);
   }
   const json = parseBody(await res.text());
   if (!json) throw new ApiError(res.ok ? 'Pandascrow sent an answer we could not read.' : messageOf(null, res.status), res.status);
