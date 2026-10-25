@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/* Same type and colours as the Pandascrow dashboard */
+@font-face { font-family: "degulardisplay"; src: url("./assets/fonts/DegularDisplay-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "degulardisplay"; src: url("./assets/fonts/DegularDisplay-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "degulardisplay"; src: url("./assets/fonts/DegularDisplay-Semibold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "degulardisplay"; src: url("./assets/fonts/DegularDisplay-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+
+@theme {
+  --font-sans: "degulardisplay", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-black: #1f1f1f;
+  --color-brand-coral: #e76f51;
+  --color-brand-slategrey: #2f3640;
+  --color-brand-blue: #182cd1;
+  --color-brand-green: #30c56b;
+  --color-brand-rust: #c84c05;
+  --color-brand-vividorange: #ff9800;
+  --color-mid-gray: #616161;
+  --color-light-gray: #939393;
+  --color-light-gray-02: #d2d2d2;
+  --color-border-gray: #e4e4e4;
+  --color-e-gray: #e9e9e9;
+  --color-g-gray: #f6f6f6;
+  --color-light-blue: #eaeef8;
+  --color-calm-dark: #141b34;
+  --shadow-card-01: 0px 1px 4px 0px rgba(186, 186, 186, 0.25);
+  --shadow-round: 2px 2px 3px 0px rgba(0, 0, 0, 0.06);
+}
+
+html, body {
+  margin: 0;
+  color: var(--color-brand-black);
+  background: #fff;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Popup size: Chrome caps popups at 800 x 600 */
+body.popup { width: 380px; height: 600px; overflow: hidden; }
+body.window { min-height: 100vh; }
+
+* { scrollbar-width: thin; scrollbar-color: #d2d2d2 transparent; }
+
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+@keyframes ps-spin { to { transform: rotate(360deg); } }
+.ps-spin { animation: ps-spin 0.8s linear infinite; }
+@keyframes ps-shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+.ps-skeleton { background: linear-gradient(90deg, #f1f1f1 0, #e9e9e9 40px, #f1f1f1 80px) #f1f1f1; background-size: 400px 100%; animation: ps-shimmer 1.2s infinite linear; border-radius: 8px; }
