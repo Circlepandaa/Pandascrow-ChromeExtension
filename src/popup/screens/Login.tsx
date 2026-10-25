@@ -10,6 +10,7 @@ type Step = { kind: 'password' } | { kind: 'email-code'; message: string } | { k
 
 export function Login({ onSignedIn, pendingDraft }: { onSignedIn: (s: Session) => void; pendingDraft?: boolean }) {
   const [env, setEnv] = useState<Env>('live');
+  const [apiKey, setApiKey] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
@@ -46,16 +47,18 @@ export function Login({ onSignedIn, pendingDraft }: { onSignedIn: (s: Session) =
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
+    const creds = { env, apiKey: apiKey.trim() };
     if (step.kind === 'password') {
+      if (!creds.apiKey) return setError(`Paste your ${env} API key from Developers → API keys.`);
       if (!isEmail(email)) return setError('Enter a valid email address.');
       if (!password) return setError('Enter your password.');
-      void handle(login(env, email.trim(), password));
+      void handle(login(creds, email.trim(), password));
     } else if (step.kind === 'email-code') {
       if (!code.trim()) return setError('Enter the code from your email.');
-      void handle(loginWithEmailCode(env, email.trim(), code.trim()));
+      void handle(loginWithEmailCode(creds, email.trim(), code.trim()));
     } else {
       if (!code.trim()) return setError('Enter the code from your authenticator app.');
-      void handle(loginWithAuthenticator(env, step.token, code.trim()));
+      void handle(loginWithAuthenticator(creds, step.token, code.trim()));
     }
   };
 
@@ -63,15 +66,26 @@ export function Login({ onSignedIn, pendingDraft }: { onSignedIn: (s: Session) =
     <div className="flex flex-col min-h-[600px] px-6 pt-6 pb-5">
       <img src={logo} alt="Pandascrow" className="h-7 w-auto self-start" />
 
-      <form onSubmit={submit} className="flex flex-col gap-5 mt-10 flex-1" noValidate>
+      <form onSubmit={submit} className="flex flex-col gap-4 mt-7 flex-1" noValidate>
         {step.kind === 'password' ? (
           <>
             <div className="flex flex-col gap-1">
               <h1 className="text-[26px] font-semibold tracking-tight leading-tight">Sign in to Pandascrow</h1>
               {pendingDraft ? <p className="text-sm text-mid-gray">Sign in to protect this purchase with escrow.</p> : null}
             </div>
+            <Field
+              label={env === 'live' ? 'Live API key' : 'Sandbox API key'}
+              hint="Dashboard → Developers → API keys. Saved only in this browser."
+              aside={
+                <a href={dashboardUrl(env, '/developers')} target="_blank" rel="noreferrer" className="text-xs font-medium text-brand-coral underline underline-offset-2">
+                  Get key
+                </a>
+              }
+            >
+              <PasswordInput autoComplete="off" spellCheck={false} placeholder="pk_live_…" value={apiKey} onChange={(e) => setApiKey(e.target.value)} autoFocus />
+            </Field>
             <Field label="Email">
-              <Input type="email" autoComplete="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus />
+              <Input type="email" autoComplete="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </Field>
             <Field
               label="Password"

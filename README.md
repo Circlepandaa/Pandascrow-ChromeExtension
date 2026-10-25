@@ -7,7 +7,7 @@ Pandascrow in your browser toolbar, styled like the Pandascrow dashboard.
 - **Escrow on marketplaces:** on Facebook Marketplace, Jiji and Instagram listings, a "Pay safely with Pandascrow" button opens the escrow form with the item's title, price and link already filled in.
 - **Alerts:** browser notifications and an unread badge when something happens on your account (payments, releases, disputes).
 
-People sign in with their Pandascrow email and password, including the email code or authenticator step if they have one turned on. Nothing secret is built into the extension.
+People sign in with their own API key (Dashboard → Developers → API keys) plus their Pandascrow email and password, including the email code or authenticator step if they have one turned on. Nothing secret is built into the extension: each person's key is stored only in their own browser and removed when they sign out.
 
 ## Install for testing
 
@@ -43,7 +43,7 @@ Upload the zip in the [Chrome Web Store developer dashboard](https://chrome.goog
 
 | Permission | Why |
 |---|---|
-| `storage` | Keep you signed in and remember your settings |
+| `storage` | Keep your API key, account and settings in this browser |
 | `alarms` | Check for new notifications every 2 minutes |
 | `notifications` | Show alerts for payments, releases and disputes |
 | Host access to `api.pandascrow.io`, `sandbox.pandascrow.io` | Talk to the Pandascrow API |
@@ -54,19 +54,20 @@ Upload the zip in the [Chrome Web Store developer dashboard](https://chrome.goog
 | Part | File | Job |
 |---|---|---|
 | Popup | `src/popup/` | React app: sign-in, home, escrows, create forms, alerts, account |
-| Background worker | `src/background/index.ts` | Notification polling, badge, token refresh, opening the escrow form from a listing |
+| Background worker | `src/background/index.ts` | Notification polling, badge, opening the escrow form from a listing |
 | Content script | `src/content/` | Finds listing pages, reads title/price/image, shows the button |
-| API client | `src/lib/api.ts` | Calls the Pandascrow API with your session token and refreshes it before it expires |
+| API client | `src/lib/api.ts` | Calls the Pandascrow API with your API key (Token header) and account ID |
 
 ### Sign-in and the API
 
-The extension uses the API's session sign-in for device apps:
+The extension calls the API the same way the SDKs and CLI do:
 
-1. `POST /login` (then `/login/otp` or `/login/2fa` when asked) returns a token for a normal login session. The session shows up in the dashboard under Settings → Login sessions, and can be signed out there.
-2. Requests send `Authorization: Bearer <token>`. The API only accepts this on the endpoints the extension needs, and always acts as the signed-in user, whatever `uuid` a request contains.
-3. Tokens last an hour. The extension calls `POST /session/refresh` before they run out, and `POST /session/logout` when you sign out.
+1. The API key for the chosen environment goes in the `Token` header of every request.
+2. `POST /login` (then `/login/otp` or `/login/2fa` when asked) finds the user's account ID, which is sent as `uuid` on every call.
+3. Before saving anything, the extension checks with `GET /application` that the key belongs to that same account.
+4. A rejected key (HTTP 401), or a device signed out from the dashboard, signs the extension out.
 
-This needs the matching API change (`app/Helpers/SessionAuth.php`) deployed to the environment you sign in to.
+Live and sandbox keys are different: pick the environment on the sign-in screen and paste that environment's key.
 
 ## Scripts
 

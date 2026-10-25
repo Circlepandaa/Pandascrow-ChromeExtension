@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { extractListing, findPrice, siteFor } from '../src/content/extract';
-import { parseBody, tokenExpiry } from '../src/lib/api';
+import { parseBody } from '../src/lib/api';
 import { money, parseAmount, timeAgo } from '../src/lib/format';
 
 function doc(html: string): Document {
@@ -63,11 +63,6 @@ describe('api helpers', () => {
     expect(parseBody('not json')).toBeNull();
   });
 
-  it('reads the expiry from a JWT', () => {
-    const payload = btoa(JSON.stringify({ exp: 1792931647 })).replace(/=+$/, '');
-    expect(tokenExpiry(`x.${payload}.y`)).toBe(1792931647);
-    expect(tokenExpiry('garbage')).toBe(0);
-  });
 });
 
 describe('format', () => {

@@ -1,4 +1,4 @@
-import { api, freshSession, SessionEnded } from '@/lib/api';
+import { api, SessionEnded } from '@/lib/api';
 import { dashboardUrl } from '@/lib/env';
 import { getSession, getSettings, setDraft } from '@/lib/storage';
 import type { Listing } from '@/content/extract';
@@ -6,7 +6,6 @@ import type { Listing } from '@/content/extract';
 /**
  * Background worker:
  *  - checks for new notifications every 2 minutes, shows browser alerts and the unread badge;
- *  - keeps the session token fresh;
  *  - opens the escrow form when a marketplace button is clicked.
  */
 
@@ -53,8 +52,6 @@ export async function poll(): Promise<void> {
       await setBadge(0);
       return;
     }
-    await freshSession(); // refresh the token even when alerts are off
-
     const settings = await getSettings();
     const res = await api('GET', '/notification', { query: { limit: 20 } });
     const items: Notice[] = res.notifications ?? [];

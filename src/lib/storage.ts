@@ -9,12 +9,13 @@ export interface SessionUser {
   compliance_status?: string | null;
 }
 
-/** What we keep after sign-in. The token is short-lived and refreshed; the login session can be signed out from the dashboard. */
+/**
+ * What we keep after sign-in: the environment, that environment's API key (sent as
+ * the Token header) and the account it belongs to. Stored only in this browser.
+ */
 export interface Session {
   env: Env;
-  token: string;
-  /** Unix seconds when the token stops working. */
-  expiresAt: number;
+  apiKey: string;
   user: SessionUser;
 }
 
@@ -46,7 +47,9 @@ function local(): chrome.storage.LocalStorageArea {
 
 export async function getSession(): Promise<Session | null> {
   const { session } = await local().get('session');
-  return (session as Session) ?? null;
+  const s = session as Session | undefined;
+  // sessions saved by older builds have no API key: sign in again
+  return s && s.apiKey && s.user?.uuid ? s : null;
 }
 
 export async function setSession(session: Session): Promise<void> {
